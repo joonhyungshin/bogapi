@@ -1,2 +1,2 @@
-# borapi
-Python API for board games
+# bogapi
+A Python framework for board games
