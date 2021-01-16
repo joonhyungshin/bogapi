@@ -1,5 +1,4 @@
-from collections.abc import Iterable, Mapping
-from typing import Any, Optional, Union
+from typing import Any, Dict, Iterable, Mapping, Optional, Union
 
 from bogapi.game.data import Data, _get_data_from_dict
 from bogapi.game.player import is_master
@@ -11,10 +10,10 @@ class RenderedComponent(object):
                  data: Mapping[str, Any],
                  position: Optional[str]):
         self.name = name
-        self.data = data
+        self.data = dict(data)
         self.position = position
 
-    def to_dict(self) -> Mapping[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'name': self.name,
             'data': self.data,
@@ -35,7 +34,7 @@ class Component(object):
         self._public = public
         self._allowed_pid = set(allowed_pid or [])
         self._position = position
-        self._data = data
+        self._data = dict(data)
 
     @property
     def name(self) -> str:
@@ -58,8 +57,11 @@ class Component(object):
         return list(self._allowed_pid)
 
     @property
-    def data(self) -> Mapping[str, Data]:
+    def data(self) -> Dict[str, Data]:
         return self._data
+
+    def __getitem__(self, item):
+        return self._data[item]
 
     def own_by(self, pid: Union[int, Iterable[int]]):
         for name in self.data:
@@ -107,7 +109,7 @@ class Component(object):
             position=self.position,
         )
 
-    def to_dict(self) -> Mapping[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'name': self.name,
             'position': self.position,
@@ -154,7 +156,7 @@ class Component(object):
 class SimpleComponent(Component):
     component_type = 'simple'
 
-    def __init__(self, name: str, content, *args, **kwargs):
+    def __init__(self, name: str, content=None, *args, **kwargs):
         data = content if isinstance(content, Data) else Data(content)
         super(SimpleComponent, self).__init__(name, {'content': data}, *args, **kwargs)
 
@@ -194,7 +196,7 @@ class SimpleCard(SimpleComponent):
 class TwoSidedCard(Component):
     component_type = 'two_sided_card'
 
-    def __init__(self, name: str, front, back, *args, **kwargs):
+    def __init__(self, name: str, front=None, back=None, *args, **kwargs):
         data = {
             'front': front if isinstance(front, Data) else Data(front, public=True),
             'back': back if isinstance(back, Data) else Data(back, public=False),

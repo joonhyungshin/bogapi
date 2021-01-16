@@ -1,5 +1,4 @@
-from collections.abc import Iterable, Mapping
-from typing import Any, Optional, Union
+from typing import Any, Dict, Iterable, Mapping, Optional, Union
 
 from bogapi.game.player import is_master
 
@@ -27,7 +26,7 @@ class Data(object):
     def allowed_pid(self) -> Iterable[int]:
         return list(self._allowed_pid)
 
-    def to_dict(self) -> Mapping[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'type': self.data_type,
             'content': self.content,

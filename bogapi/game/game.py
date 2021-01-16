@@ -1,5 +1,4 @@
-from collections.abc import Iterable, Mapping
-from typing import Any, Optional, Union
+from typing import Any, Dict, Iterable, Mapping, Optional, Union
 
 from bogapi.game.component import Component, RenderedComponent, _get_component_from_dict
 
@@ -7,6 +6,9 @@ from bogapi.game.component import Component, RenderedComponent, _get_component_f
 class Game(object):
     def __init__(self):
         self._components = {}
+
+    def get_component(self, name: str) -> Component:
+        return self._components[name]
 
     def add_component(self, component: Component, name: Optional[str] = None):
         self._components[name or component.name] = component
@@ -18,7 +20,7 @@ class Game(object):
             else:
                 self.add_component(key)
 
-    def render(self, pid: int = 0) -> Mapping[str, RenderedComponent]:
+    def render(self, pid: int = 0) -> Dict[str, RenderedComponent]:
         rendered_components = {}
         for name in self._components:
             component = self._components[name]
@@ -26,7 +28,7 @@ class Game(object):
                 rendered_components[name] = component.render(pid)
         return rendered_components
 
-    def save_components_to_dict(self) -> Mapping[str, Mapping[str, Any]]:
+    def save_components_to_dict(self) -> Dict[str, Dict[str, Any]]:
         return {
             name: self._components[name].to_dict()
             for name in self._components
@@ -41,5 +43,14 @@ class Game(object):
     def setup(self):
         raise NotImplementedError
 
-    def __getattribute__(self, item):
-        return self._components[item]
+    def apply_move(self, pid: int, move):
+        raise NotImplementedError
+
+    def verify_move(self, pid: int, move) -> bool:
+        raise NotImplementedError
+
+    def move_candidates(self, pid: int) -> Iterable[Any]:
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        return self.get_component(item)
